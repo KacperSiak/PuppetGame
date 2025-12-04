@@ -249,10 +249,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 838611001}
-  - component: {fileID: 838611000}
   - component: {fileID: 838610999}
+  - component: {fileID: 838611000}
   - component: {fileID: 838610998}
   - component: {fileID: 838611002}
+  - component: {fileID: 838611003}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -361,8 +362,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c27f2aa601213844cbbdc176ad15fa63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridPostion: {x: 0, y: 0}
+  gridPosition: {x: 0, y: 0}
   cellsize: 1
+  playerSpawnPoint: {fileID: 838611001}
+--- !u!114 &838611003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 838610996}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2036679a528e1a1488d6d6aec67ba077, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _marionette: {fileID: 431016898628491054, guid: 0d68edccdc9bf31459e3d4bb0903bd0d, type: 3}
+  _player: {fileID: 838611002}
 --- !u!1 &1401651958
 GameObject:
   m_ObjectHideFlags: 0

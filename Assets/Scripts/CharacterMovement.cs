@@ -1,31 +1,40 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 public class CharacterMovement : MonoBehaviour
 {
-    public Vector2Int gridPostion;
+    public Vector2Int gridPosition;
     public float cellsize = 1f;
+    public Transform playerSpawnPoint;
 
-    private Rigidbody _rb;
+    public static UnityEvent<Vector2Int, float> OnStep = new UnityEvent<Vector2Int, float>();  
 
     private void Start()
     {
-        _rb = GetComponent<Rigidbody>();
+       
     }
 
     private void Update()
     {
+        Vector2Int oldPosition = gridPosition;
+
         if (Input.GetKeyDown(KeyCode.W))
-            gridPostion.y += 1;
+            gridPosition.y += 1;
 
         if (Input.GetKeyDown(KeyCode.S))
-            gridPostion.y -= 1;
+            gridPosition.y -= 1;
 
         if (Input.GetKeyDown(KeyCode.D))
-            gridPostion.x += 1;
+            gridPosition.x += 1;
 
         if (Input.GetKeyDown(KeyCode.A))
-            gridPostion.x -= 1;
+            gridPosition.x -= 1;
 
-        transform.position = new Vector3(gridPostion.x * cellsize, 0, gridPostion.y * cellsize);
+        if (gridPosition != oldPosition)
+        {
+            OnStep?.Invoke(gridPosition, Time.time);
+        }
+
+        transform.position = new Vector3(gridPosition.x * cellsize, 0, gridPosition.y * cellsize);
     }
 }

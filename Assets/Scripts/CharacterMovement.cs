@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
@@ -10,34 +11,75 @@ public class CharacterMovement : MonoBehaviour
     public List<Transform> playerPositions = new List<Transform>();
 
     public static UnityEvent<Vector2Int, float> OnStep = new UnityEvent<Vector2Int, float>();
+    public static UnityEvent OnReset = new UnityEvent();
 
+    [SerializeField] private CloneRecorder recorder;
     private int _spawnIndex = 1;
 
     private void Start()
     {
-        _spawnIndex = 1;  
+        _spawnIndex = 1;
     }
 
     private void Update()
     {
-        Vector2Int oldPosition = gridPosition;
+        bool didMove = false;
+
+        if (recorder.availableSteps <= 0) return;
 
         if (Input.GetKeyDown(KeyCode.W))
-            gridPosition.y += 1;
+        { 
+            gridPosition.y += 1; 
+            didMove = true;
+        }
+
 
         if (Input.GetKeyDown(KeyCode.S))
+        {
             gridPosition.y -= 1;
+            didMove = true;
+        }
+
 
         if (Input.GetKeyDown(KeyCode.D))
+        {
             gridPosition.x += 1;
+            didMove = true;
+        }
+
 
         if (Input.GetKeyDown(KeyCode.A))
+        {
             gridPosition.x -= 1;
+            didMove = true;
+        }
 
-        if (gridPosition != oldPosition)
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            if (recorder.UndoStep(out Vector2Int prevPos))
+            {
+                gridPosition = prevPos;
+                transform.position = new Vector3(
+                    gridPosition.x * cellsize,
+                    0,
+                    gridPosition.y * cellsize
+                );
+            }
+
+            return;
+        }
+
+        if(Input.GetKeyDown(KeyCode.R))
+        {
+            ResetTheLevel();
+        }
+
+
+        if (didMove)
         {
             OnStep?.Invoke(gridPosition, Time.time);
         }
+
 
         transform.position = new Vector3(gridPosition.x * cellsize, 0, gridPosition.y * cellsize);
     }
@@ -52,5 +94,19 @@ public class CharacterMovement : MonoBehaviour
             Mathf.RoundToInt(destination.position.z / cellsize)
             );
         _spawnIndex++;
+    }
+
+    public void ResetTheLevel()
+    {
+        Transform destination = playerPositions[0];
+        transform.position = destination.position;
+
+        gridPosition = new Vector2Int(
+            Mathf.RoundToInt(destination.position.x / cellsize),
+            Mathf.RoundToInt(destination.position.z / cellsize)
+            );
+
+        _spawnIndex = 1;
+        OnReset?.Invoke();
     }
 }

@@ -16,6 +16,8 @@ public class CloneRecorderPlayer : MonoBehaviour
         _currentIndex = 0;
         _startTime = Time.time;
 
+        CharacterMovement.OnReset.AddListener(ResetTheLevel);
+
         StartCoroutine(Play());
     }
 
@@ -38,5 +40,10 @@ public class CloneRecorderPlayer : MonoBehaviour
 
             _currentIndex++;
         }
+    }
+
+    private void ResetTheLevel()
+    {
+        Destroy(gameObject);
     }
 }

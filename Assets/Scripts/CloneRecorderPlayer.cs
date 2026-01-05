@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,44 +5,42 @@ public class CloneRecorderPlayer : MonoBehaviour
 {
     [SerializeField] private float cellsize = 1f;
 
-    private List<StepFrame> _steps = new List<StepFrame>();
-    private int _currentIndex;
-    private float _startTime;
+    private List<StepFrame> _steps;
+    private int _currentIndex = 0;
 
     public void Begin(List<StepFrame> recordedSteps)
     {
         _steps = recordedSteps;
         _currentIndex = 0;
-        _startTime = Time.time;
 
+        CharacterMovement.OnStep.AddListener(AdvanceStep);
         CharacterMovement.OnReset.AddListener(ResetTheLevel);
-
-        StartCoroutine(Play());
     }
 
-    private IEnumerator Play()
+    private void AdvanceStep()
     {
-        while (_currentIndex < _steps.Count)
-        {
-            StepFrame frame = _steps[_currentIndex];
+        if (_currentIndex >= _steps.Count)
+            return;
 
-            float targetTime = _startTime + frame.time;
+        Vector2Int pos = _steps[_currentIndex].pos;
 
-            while (Time.time < targetTime)
-            {
-                yield return null;
-            }
+        transform.position = new Vector3(
+            pos.x * cellsize,
+            0f,
+            pos.y * cellsize
+        );
 
-            Vector3 worldPos = new Vector3 (frame.pos.x * cellsize, 0f, frame.pos.y * cellsize);
-
-            transform.position = worldPos;
-
-            _currentIndex++;
-        }
+        _currentIndex++;
     }
 
     private void ResetTheLevel()
     {
         Destroy(gameObject);
+    }
+
+    private void OnDestroy()
+    {
+        CharacterMovement.OnStep.RemoveListener(AdvanceStep);
+        CharacterMovement.OnReset.RemoveListener(ResetTheLevel);
     }
 }

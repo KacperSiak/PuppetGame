@@ -8,12 +8,10 @@ using TMPro;
 public struct StepFrame
 {
     public Vector2Int pos;
-    public float time;
 
-    public StepFrame(Vector2Int pos, float time)
+    public StepFrame(Vector2Int pos)
     {
-        this.pos = pos; 
-        this.time = time;
+        this.pos = pos;
     }
 }
 
@@ -22,27 +20,23 @@ public class CloneRecorder : MonoBehaviour
 {
     [SerializeField] private GameObject marionetteClone;
     [SerializeField] private CharacterMovement player;
-    [SerializeField] private int marionetteCounter;
-    public int availableSteps;
-    // [SerializeField] private TextMeshProUGUI _marionetteText;
+
+    [SerializeField] private int marionetteCounter = 3;
+    public int availableSteps = 20;
 
     private List<StepFrame> _recordedSteps = new List<StepFrame>();
-    private float _firstStepTime = -1f;
     private int _marionetteSpawnIndex = 0;
 
-    // container for reset
-    private int _marionetteCounterForReset;
-    private int _availableStepsForReset;
+    // RESET STORAGE
+    private int _initialMarionetteCounter;
+    private int _initialAvailableSteps;
 
     private void Start()
     {
-        _marionetteSpawnIndex = 0;
-        CharacterMovement.OnStep.AddListener(MadeStep);
-        CharacterMovement.OnReset.AddListener(ResetCloneRecorder);
+        _initialMarionetteCounter = marionetteCounter;
+        _initialAvailableSteps = availableSteps;
 
-        _marionetteCounterForReset = marionetteCounter;
-        _availableStepsForReset = availableSteps;   
-        //_marionetteText.text = $"Marionette Left: {_marionetteCounter}";
+        CharacterMovement.OnReset.AddListener(ResetCloneRecorder);
     }
 
     private void Update()
@@ -51,32 +45,32 @@ public class CloneRecorder : MonoBehaviour
         {
             SpawnMarionette();
             marionetteCounter--;
-           // _marionetteText.text = $"Marionette Left: {_marionetteCounter}";
         }
     }
 
-    private void MadeStep(Vector2Int step, float time)
+    // CALLED BY CharacterMovement
+    public void RecordStep(Vector2Int step)
     {
-        if (_firstStepTime < 0f) _firstStepTime = time;
-
-        _recordedSteps.Add(new StepFrame(step, time - _firstStepTime));
+        _recordedSteps.Add(new StepFrame(step));
         availableSteps--;
-        // Info in the interface about steps left
     }
 
     private void SpawnMarionette()
     {
-        GameObject marionette = Instantiate(marionetteClone, player.playerPositions[_marionetteSpawnIndex].position , Quaternion.identity);
+        GameObject marionette = Instantiate(
+            marionetteClone,
+            player.playerPositions[_marionetteSpawnIndex].position,
+            Quaternion.identity
+        );
+
         _marionetteSpawnIndex++;
 
-        marionette.TryGetComponent<CloneRecorderPlayer>(out CloneRecorderPlayer recordPlayer);
-
-        List<StepFrame> _copiedList = new List<StepFrame>(_recordedSteps);
-
-        recordPlayer.Begin(_copiedList);
+        if (marionette.TryGetComponent(out CloneRecorderPlayer clonePlayer))
+        {
+            clonePlayer.Begin(new List<StepFrame>(_recordedSteps));
+        }
 
         _recordedSteps.Clear();
-        _firstStepTime = -1f;
         player.ChangePlace();
     }
 
@@ -84,19 +78,20 @@ public class CloneRecorder : MonoBehaviour
     {
         prevPos = Vector2Int.zero;
 
-        if(_recordedSteps.Count == 0)
+        if (_recordedSteps.Count == 0)
             return false;
 
         _recordedSteps.RemoveAt(_recordedSteps.Count - 1);
         availableSteps++;
-        // change UI 
 
         if (_recordedSteps.Count == 0)
         {
-            _firstStepTime = -1f;
             prevPos = player.gridPosition;
         }
-        else prevPos = _recordedSteps[_recordedSteps.Count - 1].pos;
+        else
+        {
+            prevPos = _recordedSteps[_recordedSteps.Count - 1].pos;
+        }
 
         return true;
     }
@@ -104,10 +99,9 @@ public class CloneRecorder : MonoBehaviour
     private void ResetCloneRecorder()
     {
         _marionetteSpawnIndex = 0;
-        marionetteCounter = _marionetteCounterForReset;
-        availableSteps = _availableStepsForReset;
-        // available steps and marionette UI;
+        marionetteCounter = _initialMarionetteCounter;
+        availableSteps = _initialAvailableSteps;
+
         _recordedSteps.Clear();
-        _firstStepTime = -1f;
     }
 }

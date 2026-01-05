@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CloneRecorderPlayer : MonoBehaviour
+public class CloneRecorderPlayer : MonoBehaviour //REWORKED FULLY DUE TO REMOVING Time.time COMPONENT AND MAKING IT STEP BASED!
 {
     [SerializeField] private float cellsize = 1f;
 

@@ -23,11 +23,12 @@ public class CloneRecorder : MonoBehaviour
 
     [SerializeField] private int marionetteCounter = 3;
     public int availableSteps = 20;
+    // [SerializeField] private TextMeshProUGUI _marionetteText;
 
     private List<StepFrame> _recordedSteps = new List<StepFrame>();
     private int _marionetteSpawnIndex = 0;
 
-    // RESET STORAGE
+    // container for reset
     private int _initialMarionetteCounter;
     private int _initialAvailableSteps;
 
@@ -37,6 +38,8 @@ public class CloneRecorder : MonoBehaviour
         _initialAvailableSteps = availableSteps;
 
         CharacterMovement.OnReset.AddListener(ResetCloneRecorder);
+
+        //_marionetteText.text = $"Marionette Left: {_marionetteCounter}";
     }
 
     private void Update()
@@ -45,14 +48,17 @@ public class CloneRecorder : MonoBehaviour
         {
             SpawnMarionette();
             marionetteCounter--;
+            // _marionetteText.text = $"Marionette Left: {_marionetteCounter}";
         }
     }
 
-    // CALLED BY CharacterMovement
+    // previously called MadeStep, after reworking logic RecordStep fits better (change back if lead programmer directs it so)
+    // function called in CharacterMovement
     public void RecordStep(Vector2Int step)
     {
         _recordedSteps.Add(new StepFrame(step));
         availableSteps--;
+        // Info in the interface about steps left
     }
 
     private void SpawnMarionette()
@@ -83,6 +89,7 @@ public class CloneRecorder : MonoBehaviour
 
         _recordedSteps.RemoveAt(_recordedSteps.Count - 1);
         availableSteps++;
+        // change UI 
 
         if (_recordedSteps.Count == 0)
         {
@@ -101,6 +108,7 @@ public class CloneRecorder : MonoBehaviour
         _marionetteSpawnIndex = 0;
         marionetteCounter = _initialMarionetteCounter;
         availableSteps = _initialAvailableSteps;
+        // available steps and marionette UI;
 
         _recordedSteps.Clear();
     }

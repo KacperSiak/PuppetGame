@@ -30,6 +30,7 @@ public class CharacterMovement : MonoBehaviour
         if (recorder.availableSteps <= 0)
             return;
 
+        // MOVEMENT
         if (Input.GetKeyDown(KeyCode.W))
         {
             gridPosition.y += 1;

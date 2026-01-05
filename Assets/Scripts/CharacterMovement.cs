@@ -57,10 +57,18 @@ public class CharacterMovement : MonoBehaviour
         {
             if (recorder.UndoStep(out Vector2Int undoPos))
             {
+                // undo player
                 gridPosition = undoPos;
+
+                // undo clones
+                foreach (CloneRecorderPlayer clone in Object.FindObjectsByType<CloneRecorderPlayer>(FindObjectsSortMode.None))
+                {
+                    clone.UndoStep();
+                }
+
+                //update world
                 UpdateWorldPosition();
             }
-            return;
         }
 
         // RESET

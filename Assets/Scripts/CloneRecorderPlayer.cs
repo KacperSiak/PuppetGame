@@ -16,6 +16,15 @@ public class CloneRecorderPlayer : MonoBehaviour //REWORKED FULLY DUE TO REMOVIN
         CharacterMovement.OnStep.AddListener(AdvanceStep);
         CharacterMovement.OnReset.AddListener(ResetTheLevel);
     }
+    public void UndoStep()
+    {
+        if (_currentIndex <= 0) 
+            return; // nothing to undo
+
+        _currentIndex--; // rewind one step
+        Vector2Int pos = _steps[_currentIndex].pos;
+        transform.position = new Vector3(pos.x * cellsize, 0f, pos.y * cellsize);
+    }
 
     private void AdvanceStep()
     {

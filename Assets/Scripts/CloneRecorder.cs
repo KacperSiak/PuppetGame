@@ -32,14 +32,18 @@ public class CloneRecorder : MonoBehaviour
     private int _initialMarionetteCounter;
     private int _initialAvailableSteps;
 
+    // the spaghetti gods demand another sacrifice - record the player start position because for some reason the undo system can't undo the first move (similar issue to the CloneRecorderPlayer)
+    private Vector2Int _startLoopPosition;
+
     private void Start()
     {
         _initialMarionetteCounter = marionetteCounter;
         _initialAvailableSteps = availableSteps;
 
-        CharacterMovement.OnReset.AddListener(ResetCloneRecorder);
+        // spaghetti initialize start pos
+        _startLoopPosition = player.gridPosition;
 
-        //_marionetteText.text = $"Marionette Left: {_marionetteCounter}";
+        CharacterMovement.OnReset.AddListener(ResetCloneRecorder);
     }
 
     private void Update()
@@ -48,17 +52,13 @@ public class CloneRecorder : MonoBehaviour
         {
             SpawnMarionette();
             marionetteCounter--;
-            // _marionetteText.text = $"Marionette Left: {_marionetteCounter}";
         }
     }
 
-    // previously called MadeStep, after reworking logic RecordStep fits better (change back if lead programmer directs it so)
-    // function called in CharacterMovement
     public void RecordStep(Vector2Int step)
     {
         _recordedSteps.Add(new StepFrame(step));
         availableSteps--;
-        // Info in the interface about steps left
     }
 
     private void SpawnMarionette()
@@ -78,6 +78,9 @@ public class CloneRecorder : MonoBehaviour
 
         _recordedSteps.Clear();
         player.ChangePlace();
+
+        // spaghetti after teleporting save new position as start position
+        _startLoopPosition = player.gridPosition;
     }
 
     public bool UndoStep(out Vector2Int prevPos)
@@ -91,12 +94,15 @@ public class CloneRecorder : MonoBehaviour
         availableSteps++;
         // change UI 
 
+        // spaghetti fixed undo logic (i hope)
         if (_recordedSteps.Count == 0)
         {
-            prevPos = player.gridPosition;
+            // if no more undo, return to saved start pos (fixing the first step undo bug)
+            prevPos = _startLoopPosition;
         }
         else
         {
+            // else do normal logic and go to the last recorded step
             prevPos = _recordedSteps[_recordedSteps.Count - 1].pos;
         }
 
@@ -108,8 +114,12 @@ public class CloneRecorder : MonoBehaviour
         _marionetteSpawnIndex = 0;
         marionetteCounter = _initialMarionetteCounter;
         availableSteps = _initialAvailableSteps;
-        // available steps and marionette UI;
 
         _recordedSteps.Clear();
+
+        // reset the start anchor to the level's true start
+        // (assuming player script resets position before this is called, 
+        // otherwise might need to grab the position from playerPositions[0])
+        _startLoopPosition = player.gridPosition;
     }
 }

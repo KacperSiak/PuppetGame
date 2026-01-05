@@ -11,6 +11,7 @@ public class CharacterMovement : MonoBehaviour
     // STEP-BASED EVENT
     public static UnityEvent OnStep = new UnityEvent();
     public static UnityEvent OnReset = new UnityEvent();
+    public static UnityEvent OnUndo = new UnityEvent();
 
     [SerializeField] private CloneRecorder recorder;
 
@@ -59,15 +60,10 @@ public class CharacterMovement : MonoBehaviour
             {
                 // undo player
                 gridPosition = undoPos;
-
-                // undo clones
-                foreach (CloneRecorderPlayer clone in Object.FindObjectsByType<CloneRecorderPlayer>(FindObjectsSortMode.None))
-                {
-                    clone.UndoStep();
-                }
-
-                //update world
                 UpdateWorldPosition();
+
+                OnUndo.Invoke();
+                
             }
         }
 

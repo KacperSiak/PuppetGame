@@ -8,66 +8,118 @@ using TMPro;
 public struct StepFrame
 {
     public Vector2Int pos;
-    public float time;
 
-    public StepFrame(Vector2Int pos, float time)
+    public StepFrame(Vector2Int pos)
     {
-        this.pos = pos; 
-        this.time = time;
+        this.pos = pos;
     }
 }
 
 
 public class CloneRecorder : MonoBehaviour
 {
-    [SerializeField] private GameObject _marionette;
-    [SerializeField] private CharacterMovement _player;
-    [SerializeField] private int _marionetteCounter;
-    [SerializeField] private TextMeshProUGUI _marionetteText;
+    [SerializeField] private GameObject marionetteClone;
+    [SerializeField] private CharacterMovement player;
+
+    [SerializeField] private int marionetteCounter = 3;
+    public int availableSteps = 20;
+    // [SerializeField] private TextMeshProUGUI _marionetteText;
 
     private List<StepFrame> _recordedSteps = new List<StepFrame>();
-    private float _firstStepTime = -1f;
-    private int _spawnIndex = 0;
+    private int _marionetteSpawnIndex = 0;
 
-    
+    // container for reset
+    private int _initialMarionetteCounter;
+    private int _initialAvailableSteps;
+
+    // the spaghetti gods demand another sacrifice - record the player start position because for some reason the undo system can't undo the first move (similar issue to the CloneRecorderPlayer)
+    private Vector2Int _startLoopPosition;
 
     private void Start()
     {
-        _spawnIndex = 0;
-        CharacterMovement.OnStep.AddListener(MadeStep);
-        _marionetteText.text = $"Marionette Left: {_marionetteCounter}";
+        _initialMarionetteCounter = marionetteCounter;
+        _initialAvailableSteps = availableSteps;
+
+        // spaghetti initialize start pos
+        _startLoopPosition = player.gridPosition;
+
+        CharacterMovement.OnReset.AddListener(ResetCloneRecorder);
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.R) && _marionetteCounter > 0)
+        if (Input.GetKeyDown(KeyCode.Q) && marionetteCounter > 0)
         {
             SpawnMarionette();
-            _marionetteCounter--;
-            _marionetteText.text = $"Marionette Left: {_marionetteCounter}";
+            marionetteCounter--;
         }
     }
 
-    private void MadeStep(Vector2Int step, float time)
+    public void RecordStep(Vector2Int step)
     {
-        if (_firstStepTime < 0f) _firstStepTime = time;
-
-        _recordedSteps.Add(new StepFrame(step, time - _firstStepTime));
+        _recordedSteps.Add(new StepFrame(step));
+        availableSteps--;
     }
 
     private void SpawnMarionette()
     {
-        GameObject marionette = Instantiate(_marionette, _player.playerPositions[_spawnIndex].position , Quaternion.identity);
-        _spawnIndex++;
+        GameObject marionette = Instantiate(
+            marionetteClone,
+            player.playerPositions[_marionetteSpawnIndex].position,
+            Quaternion.identity
+        );
 
-        marionette.TryGetComponent<CloneRecorderPlayer>(out CloneRecorderPlayer recordPlayer);
+        _marionetteSpawnIndex++;
 
-        List<StepFrame> _copiedList = new List<StepFrame>(_recordedSteps);
-
-        recordPlayer.Begin(_copiedList);
+        if (marionette.TryGetComponent(out CloneRecorderPlayer clonePlayer))
+        {
+            clonePlayer.Begin(new List<StepFrame>(_recordedSteps));
+        }
 
         _recordedSteps.Clear();
-        _firstStepTime = -1f;
-        _player.ChangePlace();
+        player.ChangePlace();
+
+        // spaghetti after teleporting save new position as start position
+        _startLoopPosition = player.gridPosition;
+    }
+
+    public bool UndoStep(out Vector2Int prevPos)
+    {
+        prevPos = Vector2Int.zero;
+
+        if (_recordedSteps.Count == 0)
+            return false;
+
+        _recordedSteps.RemoveAt(_recordedSteps.Count - 1);
+        availableSteps++;
+        // change UI 
+
+        // spaghetti fixed undo logic (i hope)
+        if (_recordedSteps.Count == 0)
+        {
+            // if no more undo, return to saved start pos (fixing the first step undo bug)
+            prevPos = _startLoopPosition;
+        }
+        else
+        {
+            // else do normal logic and go to the last recorded step
+            prevPos = _recordedSteps[_recordedSteps.Count - 1].pos;
+        }
+
+        return true;
+    }
+
+    private void ResetCloneRecorder()
+    {
+        _marionetteSpawnIndex = 0;
+        marionetteCounter = _initialMarionetteCounter;
+        availableSteps = _initialAvailableSteps;
+
+        _recordedSteps.Clear();
+
+        // reset the start anchor to the level's true start
+        // (assuming player script resets position before this is called, 
+        // otherwise might need to grab the position from playerPositions[0])
+        _startLoopPosition = player.gridPosition;
     }
 }

@@ -32,25 +32,19 @@ public class CharacterMovement : MonoBehaviour
             return;
 
         // MOVEMENT
-        if (Input.GetKeyDown(KeyCode.W))
+        Vector2Int moveDir = Vector2Int.zero;
+
+        if (Input.GetKeyDown(KeyCode.W)) moveDir = Vector2Int.up;
+        else if (Input.GetKeyDown(KeyCode.S)) moveDir = Vector2Int.down;
+        else if (Input.GetKeyDown(KeyCode.D)) moveDir = Vector2Int.right;
+        else if (Input.GetKeyDown(KeyCode.A)) moveDir = Vector2Int.left;
+
+        if (moveDir != Vector2Int.zero)
         {
-            gridPosition.y += 1;
-            didMove = true;
-        }
-        else if (Input.GetKeyDown(KeyCode.S))
-        {
-            gridPosition.y -= 1;
-            didMove = true;
-        }
-        else if (Input.GetKeyDown(KeyCode.D))
-        {
-            gridPosition.x += 1;
-            didMove = true;
-        }
-        else if (Input.GetKeyDown(KeyCode.A))
-        {
-            gridPosition.x -= 1;
-            didMove = true;
+            if (TryMove(moveDir))
+            {
+                didMove = true;
+            }
         }
 
         // UNDO
@@ -118,4 +112,31 @@ public class CharacterMovement : MonoBehaviour
         _spawnIndex = 1;
         OnReset.Invoke();
     }
+
+    private bool TryMove(Vector2Int direction)
+    {
+        Vector2Int targetPos = gridPosition + direction;
+        Vector3 checkPos = new Vector3(targetPos.x * cellsize, 0, targetPos.y * cellsize);
+
+        // 1. Check for Walls (use a Wall layer)
+        if (Physics.CheckSphere(checkPos, 0.3f, LayerMask.GetMask("Wall")))
+            return false;
+
+        // 2. Check for Boxes
+        Collider[] colliders = Physics.OverlapSphere(checkPos, 0.3f, LayerMask.GetMask("Box"));
+        if (colliders.Length > 0)
+        {
+            PushableBox box = colliders[0].GetComponent<PushableBox>();
+            if (box != null)
+            {
+                // Try pushing the box. If the box is blocked, the player is blocked.
+                if (!box.Push(direction)) return false;
+            }
+        }
+
+        gridPosition = targetPos;
+        return true;
+    }
+
+
 }

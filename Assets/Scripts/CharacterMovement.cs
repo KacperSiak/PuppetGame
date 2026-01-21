@@ -18,6 +18,7 @@ public class CharacterMovement : MonoBehaviour
     private int _spawnIndex = 1;
 
     public static UnityEvent OnPreUndo = new UnityEvent();
+    public static UnityEvent OnLateStep = new UnityEvent();
 
     private void Start()
     {
@@ -77,7 +78,10 @@ public class CharacterMovement : MonoBehaviour
         {
             recorder.RecordStep(gridPosition);
             UpdateWorldPosition();
+
             OnStep.Invoke();
+            // fix for ordering
+            OnLateStep.Invoke();
         }
     }
 
@@ -122,18 +126,18 @@ public class CharacterMovement : MonoBehaviour
         Vector2Int targetPos = gridPosition + direction;
         Vector3 checkPos = new Vector3(targetPos.x * cellsize, 0, targetPos.y * cellsize);
 
-        // 1. Check for Walls (use a Wall layer)
+        // check for walls
         if (Physics.CheckSphere(checkPos, 0.3f, LayerMask.GetMask("Wall")))
             return false;
 
-        // 2. Check for Boxes
+        // check for boxes
         Collider[] colliders = Physics.OverlapSphere(checkPos, 0.3f, LayerMask.GetMask("Box"));
         if (colliders.Length > 0)
         {
             PushableBox box = colliders[0].GetComponent<PushableBox>();
             if (box != null)
             {
-                // Try pushing the box. If the box is blocked, the player is blocked.
+                // try push, if box is blocked then block the player
                 if (!box.Push(direction)) return false;
             }
         }

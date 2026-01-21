@@ -57,17 +57,27 @@ public class CloneRecorderPlayer : MonoBehaviour //REWORKED FULLY DUE TO REMOVIN
     private void AdvanceStep()
     {
         _stepsFromBirth++;
-        if (_currentIndex >= _steps.Count) return;
+
+        if (_currentIndex >= _steps.Count)
+            return;
 
         Vector2Int nextPos = _steps[_currentIndex].pos;
-        Vector2Int direction = nextPos - Vector2Int.RoundToInt(new Vector2(transform.position.x / cellsize, transform.position.z / cellsize));
 
-        // check for box
+        // avoid float drift
+        Vector2Int currentGridPos = new Vector2Int(
+            Mathf.RoundToInt(transform.position.x / cellsize),
+            Mathf.RoundToInt(transform.position.z / cellsize)
+        );
+        Vector2Int direction = nextPos - currentGridPos;
+
+        // push logic
         Collider[] colliders = Physics.OverlapSphere(new Vector3(nextPos.x * cellsize, 0, nextPos.y * cellsize), 0.3f, LayerMask.GetMask("Box"));
-        if (colliders.Length > 0)
+        foreach (var hit in colliders)
         {
-            PushableBox box = colliders[0].GetComponent<PushableBox>();
-            if (box != null) box.Push(direction);
+            if (hit.TryGetComponent(out PushableBox box))
+            {
+                box.Push(direction);
+            }
         }
 
         transform.position = new Vector3(nextPos.x * cellsize, 0f, nextPos.y * cellsize);

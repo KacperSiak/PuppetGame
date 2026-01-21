@@ -20,9 +20,10 @@ public class PushableBox : MonoBehaviour
         _startPosition = gridPosition;
 
         CloneRecorder.OnCloneSpawned.AddListener(ResetBox);
-        CharacterMovement.OnStep.AddListener(RecordHistory);
+        CharacterMovement.OnLateStep.AddListener(RecordHistory);
         CharacterMovement.OnUndo.AddListener(Undo);
         CharacterMovement.OnReset.AddListener(ResetBox);
+
 
         UpdateWorldPosition();
     }
@@ -78,7 +79,7 @@ public class PushableBox : MonoBehaviour
     private void OnDestroy() // gemini said this prevents memory leaks so here we go
     {
         CloneRecorder.OnCloneSpawned.RemoveListener(ResetBox);
-        CharacterMovement.OnStep.RemoveListener(RecordHistory);
+        CharacterMovement.OnLateStep.RemoveListener(RecordHistory);
         CharacterMovement.OnUndo.RemoveListener(Undo);
         CharacterMovement.OnReset.RemoveListener(ResetBox);
     }

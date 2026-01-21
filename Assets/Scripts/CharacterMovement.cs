@@ -17,6 +17,8 @@ public class CharacterMovement : MonoBehaviour
 
     private int _spawnIndex = 1;
 
+    public static UnityEvent OnPreUndo = new UnityEvent();
+
     private void Start()
     {
         _spawnIndex = 1;
@@ -52,12 +54,14 @@ public class CharacterMovement : MonoBehaviour
         {
             if (recorder.UndoStep(out Vector2Int undoPos))
             {
-                // undo player
+                //fixing clone box order
+                // undo event
+                OnPreUndo.Invoke();
+                // update pos
                 gridPosition = undoPos;
                 UpdateWorldPosition();
-
+                // move box
                 OnUndo.Invoke();
-                
             }
         }
 

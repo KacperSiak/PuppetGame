@@ -52,7 +52,6 @@ public class PushableBox : MonoBehaviour
     {
         if (_history.Count > 0)
         {
-            
             _history.RemoveAt(_history.Count - 1);
 
             if (_history.Count == 0)

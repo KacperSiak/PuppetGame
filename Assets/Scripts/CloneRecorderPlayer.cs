@@ -26,7 +26,7 @@ public class CloneRecorderPlayer : MonoBehaviour //REWORKED FULLY DUE TO REMOVIN
 
         CharacterMovement.OnStep.AddListener(AdvanceStep);
         CharacterMovement.OnReset.AddListener(ResetTheLevel);
-        CharacterMovement.OnUndo.AddListener(TryUndo);
+        CharacterMovement.OnPreUndo.AddListener(TryUndo);
 
     }
     public void UndoStep()
@@ -110,5 +110,6 @@ public class CloneRecorderPlayer : MonoBehaviour //REWORKED FULLY DUE TO REMOVIN
     {
         CharacterMovement.OnStep.RemoveListener(AdvanceStep);
         CharacterMovement.OnReset.RemoveListener(ResetTheLevel);
+        CharacterMovement.OnPreUndo.RemoveListener(TryUndo);
     }
 }

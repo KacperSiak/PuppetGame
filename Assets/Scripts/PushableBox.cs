@@ -19,6 +19,7 @@ public class PushableBox : MonoBehaviour
         );
         _startPosition = gridPosition;
 
+        CloneRecorder.OnCloneSpawned.AddListener(ResetBox);
         CharacterMovement.OnStep.AddListener(RecordHistory);
         CharacterMovement.OnUndo.AddListener(Undo);
         CharacterMovement.OnReset.AddListener(ResetBox);
@@ -75,8 +76,9 @@ public class PushableBox : MonoBehaviour
         transform.position = new Vector3(gridPosition.x * cellSize, 0f, gridPosition.y * cellSize); // 0f is box height location, currently hard set to Y=0
     }
 
-    private void OnDestroy()
+    private void OnDestroy() // gemini said this prevents memory leaks so here we go
     {
+        CloneRecorder.OnCloneSpawned.RemoveListener(ResetBox);
         CharacterMovement.OnStep.RemoveListener(RecordHistory);
         CharacterMovement.OnUndo.RemoveListener(Undo);
         CharacterMovement.OnReset.RemoveListener(ResetBox);

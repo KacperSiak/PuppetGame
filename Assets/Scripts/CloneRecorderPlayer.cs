@@ -57,20 +57,23 @@ public class CloneRecorderPlayer : MonoBehaviour //REWORKED FULLY DUE TO REMOVIN
     private void AdvanceStep()
     {
         _stepsFromBirth++;
+        if (_currentIndex >= _steps.Count) return;
 
-        if (_currentIndex >= _steps.Count)
-            return;
+        Vector2Int nextPos = _steps[_currentIndex].pos;
+        Vector2Int direction = nextPos - Vector2Int.RoundToInt(new Vector2(transform.position.x / cellsize, transform.position.z / cellsize));
 
-        Vector2Int pos = _steps[_currentIndex].pos;
+        // check for box
+        Collider[] colliders = Physics.OverlapSphere(new Vector3(nextPos.x * cellsize, 0, nextPos.y * cellsize), 0.3f, LayerMask.GetMask("Box"));
+        if (colliders.Length > 0)
+        {
+            PushableBox box = colliders[0].GetComponent<PushableBox>();
+            if (box != null) box.Push(direction);
+        }
 
-        transform.position = new Vector3(
-            pos.x * cellsize,
-            0f,
-            pos.y * cellsize
-        );
-
+        transform.position = new Vector3(nextPos.x * cellsize, 0f, nextPos.y * cellsize);
         _currentIndex++;
     }
+
     public void TryUndo()
     {
         // only rewind when needed

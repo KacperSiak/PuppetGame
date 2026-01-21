@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.Events;
 
 
 [System.Serializable]
@@ -34,6 +35,9 @@ public class CloneRecorder : MonoBehaviour
 
     // the spaghetti gods demand another sacrifice - record the player start position because for some reason the undo system can't undo the first move (similar issue to the CloneRecorderPlayer)
     private Vector2Int _startLoopPosition;
+
+    // unity event when clone is spawned
+    public static UnityEvent OnCloneSpawned = new UnityEvent();
 
     private void Start()
     {
@@ -70,6 +74,9 @@ public class CloneRecorder : MonoBehaviour
         );
 
         _marionetteSpawnIndex++;
+
+        // invoke spawn clone event
+        OnCloneSpawned.Invoke();
 
         if (marionette.TryGetComponent(out CloneRecorderPlayer clonePlayer))
         {

@@ -1,23 +1,22 @@
 using System;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class FinalDestination : MonoBehaviour
 {
-    [SerializeField] private GameObject _winPanel;
-    [SerializeField] private Transform _placeToAchive;
+    public static UnityEvent OnLevelEnd = new UnityEvent();
 
     private void Start()
     {
-        _winPanel.SetActive(false);
-        transform.position = _placeToAchive.position;
+
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent<CharacterMovement>(out var movement ))
         {
-            _winPanel.SetActive(true);
-            PauseGame();
+            Debug.Log("Zamykamy kurwa impreze");
+            OnLevelEnd?.Invoke();
         }
     }
 

@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class GateController : MonoBehaviour
 {
+    [SerializeField] private GameObject gateBlocker;
+
     private Animator _animator;
     private bool _left;
     private bool _right;
@@ -23,26 +25,27 @@ public class GateController : MonoBehaviour
         {
             _animator.SetTrigger("Up");
             _isGateOpen = true;
-            Debug.Log("Otwieram brame");
+            gateBlocker.SetActive(false);
         }
         else if (!shouldBeOpen && _isGateOpen)
         {
             _animator.SetTrigger("Down");
             _isGateOpen = false;
+            gateBlocker.SetActive(true);
         }
 
     }
 
     private void AddSwitch(int ID)
     {
-        if (ID == 2) { _left = true; Debug.Log("Lewy w³¹czony"); }
-        else if (ID == 3) { _right = true; Debug.Log("Prawy w³¹czony"); }
+        if (ID == 2) _left = true;
+        else if (ID == 3) _right = true; 
     }
 
     private void RemoveSwitch(int ID)
     {
-        if (ID == 2) { _left = false;  Debug.Log("Lewy wy³¹czony"); }
-        else if (ID == 3) { _right = false; Debug.Log("Prawy wy³¹czony"); }
+        if (ID == 2) _left = false;
+        else if (ID == 3) _right = false;
     }
 
 

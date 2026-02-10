@@ -1,57 +1,26 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CloneRecorderPlayer : MonoBehaviour //REWORKED FULLY DUE TO REMOVING Time.time COMPONENT AND MAKING IT STEP BASED!
+public class CloneRecorderPlayer : MonoBehaviour
 {
     [SerializeField] private float cellsize = 1f;
 
     private List<StepFrame> _steps;
     private int _currentIndex = 0;
 
-    // undo bugfix spaghetti needs me to record the starting position of the clone
     private Vector3 _startPosition;
-    // tracks how many global steps have occurred since the clone was born (asked gemini for help xd)
     private int _stepsFromBirth = 0;
 
     public void Begin(List<StepFrame> recordedSteps)
     {
         _steps = recordedSteps;
         _currentIndex = 0;
-
-
-        //undo bugfix spaghetti pt2 (capture the starting pos) [also late undo clone fix]:
-        _stepsFromBirth = 0; // Start at zero
+        _stepsFromBirth = 0;
         _startPosition = transform.position;
-
 
         CharacterMovement.OnStep.AddListener(AdvanceStep);
         CharacterMovement.OnReset.AddListener(ResetTheLevel);
         CharacterMovement.OnPreUndo.AddListener(TryUndo);
-
-    }
-    public void UndoStep()
-    {
-        if (_currentIndex <= 0)
-            return; // nothing to undo
-
-        _currentIndex--; // rewind index state
-
-        // 3. LOGIC FIX: Check where to move
-        if (_currentIndex == 0)
-        {
-            // If we rewound to 0, we are back at the start line
-            transform.position = _startPosition;
-        }
-        else
-        {
-            // Otherwise, we move to the PREVIOUS step (index - 1)
-            // Example: If index is 1, we are physically at step 0. 
-            // To undo, we need to move to step "-1" (which is start) 
-            // or if index is 2, move to step 1.
-
-            Vector2Int pos = _steps[_currentIndex - 1].pos;
-            transform.position = new Vector3(pos.x * cellsize, 0f, pos.y * cellsize);
-        }
     }
 
     private void AdvanceStep()
@@ -61,17 +30,21 @@ public class CloneRecorderPlayer : MonoBehaviour //REWORKED FULLY DUE TO REMOVIN
         if (_currentIndex >= _steps.Count)
             return;
 
-        Vector2Int nextPos = _steps[_currentIndex].pos;
+        // CHANGED: Use Vector3Int
+        Vector3Int nextPos = _steps[_currentIndex].pos;
 
-        // avoid float drift
-        Vector2Int currentGridPos = new Vector2Int(
+        // CHANGED: Calculate current grid pos as Vector3Int
+        Vector3Int currentGridPos = new Vector3Int(
             Mathf.RoundToInt(transform.position.x / cellsize),
+            Mathf.RoundToInt(transform.position.y / cellsize),
             Mathf.RoundToInt(transform.position.z / cellsize)
         );
-        Vector2Int direction = nextPos - currentGridPos;
 
-        // push logic
-        Collider[] colliders = Physics.OverlapSphere(new Vector3(nextPos.x * cellsize, 0, nextPos.y * cellsize), 0.3f, LayerMask.GetMask("Box"));
+        // CHANGED: Direction is now Vector3Int
+        Vector3Int direction = nextPos - currentGridPos;
+
+        // Push logic - checking overlap in 3D
+        Collider[] colliders = Physics.OverlapSphere(new Vector3(nextPos.x * cellsize, nextPos.y * cellsize, nextPos.z * cellsize), 0.3f, LayerMask.GetMask("Box"));
         foreach (var hit in colliders)
         {
             if (hit.TryGetComponent(out PushableBox box))
@@ -80,23 +53,21 @@ public class CloneRecorderPlayer : MonoBehaviour //REWORKED FULLY DUE TO REMOVIN
             }
         }
 
-        transform.position = new Vector3(nextPos.x * cellsize, 0f, nextPos.y * cellsize);
+        // Apply movement using Y axis
+        transform.position = new Vector3(nextPos.x * cellsize, nextPos.y * cellsize, nextPos.z * cellsize);
         _currentIndex++;
     }
 
     public void TryUndo()
     {
-        // only rewind when needed
         if (_stepsFromBirth <= 0)
             return;
 
-        _stepsFromBirth--; // player moved back
+        _stepsFromBirth--;
 
-        // if the player is still "ahead" of where we finished our recording, clone stays at its final position and wait for the player to come back
         if (_stepsFromBirth >= _steps.Count)
             return;
 
-        // otherwise perform normal undo logic
         _currentIndex--;
 
         if (_currentIndex <= 0)
@@ -106,8 +77,9 @@ public class CloneRecorderPlayer : MonoBehaviour //REWORKED FULLY DUE TO REMOVIN
         }
         else
         {
-            Vector2Int pos = _steps[_currentIndex - 1].pos;
-            transform.position = new Vector3(pos.x * cellsize, 0f, pos.y * cellsize);
+            // CHANGED: Using Vector3Int from steps
+            Vector3Int pos = _steps[_currentIndex - 1].pos;
+            transform.position = new Vector3(pos.x * cellsize, pos.y * cellsize, pos.z * cellsize);
         }
     }
 

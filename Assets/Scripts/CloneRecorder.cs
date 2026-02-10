@@ -1,21 +1,17 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
 using UnityEngine.Events;
-
 
 [System.Serializable]
 public struct StepFrame
 {
-    public Vector2Int pos;
+    public Vector3Int pos; // CHANGED: Now uses Vector3Int
 
-    public StepFrame(Vector2Int pos)
+    public StepFrame(Vector3Int pos)
     {
         this.pos = pos;
     }
 }
-
 
 public class CloneRecorder : MonoBehaviour
 {
@@ -24,19 +20,16 @@ public class CloneRecorder : MonoBehaviour
 
     [SerializeField] private int marionetteCounter = 3;
     public int availableSteps = 20;
-    // [SerializeField] private TextMeshProUGUI _marionetteText;
 
     private List<StepFrame> _recordedSteps = new List<StepFrame>();
     private int _marionetteSpawnIndex = 0;
 
-    // container for reset
     private int _initialMarionetteCounter;
     private int _initialAvailableSteps;
 
-    // the spaghetti gods demand another sacrifice - record the player start position because for some reason the undo system can't undo the first move (similar issue to the CloneRecorderPlayer)
-    private Vector2Int _startLoopPosition;
+    // CHANGED: Now uses Vector3Int
+    private Vector3Int _startLoopPosition;
 
-    // unity event when clone is spawned
     public static UnityEvent OnCloneSpawned = new UnityEvent();
 
     private void Start()
@@ -44,7 +37,6 @@ public class CloneRecorder : MonoBehaviour
         _initialMarionetteCounter = marionetteCounter;
         _initialAvailableSteps = availableSteps;
 
-        // spaghetti initialize start pos
         _startLoopPosition = player.gridPosition;
 
         CharacterMovement.OnReset.AddListener(ResetCloneRecorder);
@@ -59,7 +51,8 @@ public class CloneRecorder : MonoBehaviour
         }
     }
 
-    public void RecordStep(Vector2Int step)
+    // CHANGED: Parameter type to Vector3Int
+    public void RecordStep(Vector3Int step)
     {
         _recordedSteps.Add(new StepFrame(step));
         availableSteps--;
@@ -75,7 +68,6 @@ public class CloneRecorder : MonoBehaviour
 
         _marionetteSpawnIndex++;
 
-        // invoke spawn clone event
         OnCloneSpawned.Invoke();
 
         if (marionette.TryGetComponent(out CloneRecorderPlayer clonePlayer))
@@ -86,30 +78,26 @@ public class CloneRecorder : MonoBehaviour
         _recordedSteps.Clear();
         player.ChangePlace();
 
-        // spaghetti after teleporting save new position as start position
         _startLoopPosition = player.gridPosition;
     }
 
-    public bool UndoStep(out Vector2Int prevPos)
+    // CHANGED: Parameter type to Vector3Int
+    public bool UndoStep(out Vector3Int prevPos)
     {
-        prevPos = Vector2Int.zero;
+        prevPos = Vector3Int.zero;
 
         if (_recordedSteps.Count == 0)
             return false;
 
         _recordedSteps.RemoveAt(_recordedSteps.Count - 1);
         availableSteps++;
-        // change UI 
 
-        // spaghetti fixed undo logic (i hope)
         if (_recordedSteps.Count == 0)
         {
-            // if no more undo, return to saved start pos (fixing the first step undo bug)
             prevPos = _startLoopPosition;
         }
         else
         {
-            // else do normal logic and go to the last recorded step
             prevPos = _recordedSteps[_recordedSteps.Count - 1].pos;
         }
 
@@ -123,10 +111,6 @@ public class CloneRecorder : MonoBehaviour
         availableSteps = _initialAvailableSteps;
 
         _recordedSteps.Clear();
-
-        // reset the start anchor to the level's true start
-        // (assuming player script resets position before this is called, 
-        // otherwise might need to grab the position from playerPositions[0])
         _startLoopPosition = player.gridPosition;
     }
 }

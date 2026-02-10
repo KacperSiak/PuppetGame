@@ -40,14 +40,12 @@ public class FloorButton : MonoBehaviour
         if(isValid && !_isSomethingOn)
         {
             _isSomethingOn = true;
-            Debug.Log("Onguzik");
             OnButtonDown?.Invoke(buttonID);
             if (pressMaterial != null) _renderer.material = pressMaterial;
         }
         else if (!isValid && _isSomethingOn)
         {
             _isSomethingOn= false;
-            Debug.Log("OffGuzik");
             OnButtonUp?.Invoke(buttonID);
             if (baseMaterial != null) _renderer.material = baseMaterial;
         }    

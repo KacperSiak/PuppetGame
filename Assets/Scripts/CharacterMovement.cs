@@ -16,6 +16,7 @@ public class CharacterMovement : MonoBehaviour
 
     [SerializeField] private CloneRecorder recorder;
     private int _spawnIndex = 1;
+    private Animator _animator;
 
     private void Start()
     {
@@ -27,6 +28,8 @@ public class CharacterMovement : MonoBehaviour
             Mathf.RoundToInt(transform.position.z / cellsize)
         );
         UpdateWorldPosition();
+
+        _animator = GetComponent<Animator>();
     }
 
     private void Update()
@@ -73,6 +76,8 @@ public class CharacterMovement : MonoBehaviour
         // COMMIT MOVE
         if (didMove)
         {
+            transform.rotation = Quaternion.LookRotation(moveDir);
+
             recorder.RecordStep(gridPosition);
             UpdateWorldPosition();
             OnStep.Invoke();
@@ -160,6 +165,7 @@ public class CharacterMovement : MonoBehaviour
         }
 
         gridPosition = targetPos;
+        _animator.SetTrigger("Walk");
         return true;
     }
 }

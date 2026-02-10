@@ -3,9 +3,13 @@ using UnityEngine;
 
 public class ElevatorTile : MonoBehaviour
 {
-    // 1 = Up, -1 = Down
+    [Header("Settings")]
     public int heightDelta = 1;
     public float cellSize = 1f;
+
+    // NEW: Toggle this to make it a "Bumper" instead of an "Elevator"
+    [Tooltip("If true, the platform won't move, it just bumps the player.")]
+    public bool isStatic = false;
 
     // History for Undo functionality
     private List<Vector3> _historyPos = new List<Vector3>();
@@ -19,25 +23,28 @@ public class ElevatorTile : MonoBehaviour
         _startPos = transform.position;
         _startDelta = heightDelta;
 
-        // Subscribe to the same events as the player/boxes
         CharacterMovement.OnLateStep.AddListener(RecordHistory);
         CharacterMovement.OnUndo.AddListener(Undo);
         CharacterMovement.OnReset.AddListener(ResetElevator);
     }
 
-    // Called by the Player when they step on this tile
     public void Interact()
     {
+        // NEW: If it's static, do nothing! 
+        // The player has already received the "bump" from the CheckFloor logic in CharacterMovement.
+        // We just skip the part where the platform moves or flips direction.
+        if (isStatic) return;
+
         // 1. Move the visual object
         transform.position += new Vector3(0, heightDelta * cellSize, 0);
 
-        // 2. Flip direction for the next interaction (Up -> Down)
+        // 2. Flip direction for the next interaction
         heightDelta = -heightDelta;
     }
 
     private void RecordHistory()
     {
-        // Save current state (whether we moved or not)
+        // We still record history for static tiles so the lists stay in sync with the Undo system
         _historyPos.Add(transform.position);
         _historyDelta.Add(heightDelta);
     }
@@ -46,11 +53,9 @@ public class ElevatorTile : MonoBehaviour
     {
         if (_historyPos.Count > 0)
         {
-            // Remove the latest frame
             _historyPos.RemoveAt(_historyPos.Count - 1);
             _historyDelta.RemoveAt(_historyDelta.Count - 1);
 
-            // Restore state
             if (_historyPos.Count > 0)
             {
                 transform.position = _historyPos[_historyPos.Count - 1];
@@ -58,7 +63,6 @@ public class ElevatorTile : MonoBehaviour
             }
             else
             {
-                // If history is empty, go to start
                 ResetElevator();
             }
         }

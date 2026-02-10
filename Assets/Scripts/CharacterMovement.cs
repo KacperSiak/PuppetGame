@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class CharacterMovement : MonoBehaviour
+public class CharacterMovement : MonoBehaviour, IPressable
 {
     public Vector3Int gridPosition; // Changed to Vector3Int
     public float cellsize = 1f;

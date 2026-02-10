@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PushableBox : MonoBehaviour
+public class PushableBox : MonoBehaviour, IPressable
 {
     public Vector3Int gridPosition; // Changed to Vector3Int
     public float cellSize = 1f;

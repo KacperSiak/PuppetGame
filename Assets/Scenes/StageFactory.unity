@@ -1324,6 +1324,45 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &842292150 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -8136615460960542039, guid: ff4a7ed590a726c4b92835026e73738f, type: 3}
+  m_PrefabInstance: {fileID: 1174522049}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &842292152
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 842292150}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c79f6f8d73d63ea40a2e7a17374a3a6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  heightDelta: 5
+--- !u!65 &842292155
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 842292150}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 9.514269, y: 9.517831, z: 8.191988}
+  m_Center: {x: 0.0000019073486, y: -0.0017800336, z: -1.2198485}
 --- !u!1001 &853561872
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2085,7 +2124,13 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: -8136615460960542039, guid: ff4a7ed590a726c4b92835026e73738f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 842292155}
+    - targetCorrespondingSourceObject: {fileID: -8136615460960542039, guid: ff4a7ed590a726c4b92835026e73738f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 842292152}
   m_SourcePrefab: {fileID: 100100000, guid: ff4a7ed590a726c4b92835026e73738f, type: 3}
 --- !u!4 &1174522050 stripped
 Transform:
@@ -3406,7 +3451,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c27f2aa601213844cbbdc176ad15fa63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridPosition: {x: 0, y: 0}
+  gridPosition: {x: 0, y: 0, z: 0}
   cellsize: 1
   playerPositions:
   - {fileID: 82673547}

@@ -32,6 +32,8 @@ public class CloneRecorder : MonoBehaviour
 
     public static UnityEvent OnCloneSpawned = new UnityEvent();
 
+    public static UnityEvent OnReplay = new UnityEvent();
+
     private void Start()
     {
         _initialMarionetteCounter = marionetteCounter;
@@ -60,6 +62,8 @@ public class CloneRecorder : MonoBehaviour
 
     private void SpawnMarionette()
     {
+        OnReplay.Invoke();
+
         GameObject marionette = Instantiate(
             marionetteClone,
             player.playerPositions[_marionetteSpawnIndex].position,

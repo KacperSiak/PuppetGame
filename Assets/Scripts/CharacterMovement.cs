@@ -34,6 +34,25 @@ public class CharacterMovement : MonoBehaviour, IPressable
 
     private void Update()
     {
+
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            ResetTheLevel();
+            return;
+        }
+
+        // UNDO
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            if (recorder.UndoStep(out Vector3Int undoPos))
+            {
+                OnPreUndo.Invoke();
+                gridPosition = undoPos;
+                UpdateWorldPosition();
+                OnUndo.Invoke();
+            }
+        }
+
         bool didMove = false;
 
         if (recorder.availableSteps <= 0) return;
@@ -54,24 +73,6 @@ public class CharacterMovement : MonoBehaviour, IPressable
             }
         }
 
-        // UNDO
-        if (Input.GetKeyDown(KeyCode.Z))
-        {
-            if (recorder.UndoStep(out Vector3Int undoPos)) // Updated out type
-            {
-                OnPreUndo.Invoke();
-                gridPosition = undoPos;
-                UpdateWorldPosition();
-                OnUndo.Invoke();
-            }
-        }
-
-        // RESET
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            ResetTheLevel();
-            return;
-        }
 
         // COMMIT MOVE
         if (didMove)

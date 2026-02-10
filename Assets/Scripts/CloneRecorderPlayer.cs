@@ -21,6 +21,7 @@ public class CloneRecorderPlayer : MonoBehaviour
         CharacterMovement.OnStep.AddListener(AdvanceStep);
         CharacterMovement.OnReset.AddListener(ResetTheLevel);
         CharacterMovement.OnPreUndo.AddListener(TryUndo);
+        CloneRecorder.OnReplay.AddListener(RestartLoop);
     }
 
     private void AdvanceStep()
@@ -88,10 +89,21 @@ public class CloneRecorderPlayer : MonoBehaviour
         Destroy(gameObject);
     }
 
+    private void RestartLoop()
+    {
+        // Reset counters
+        _currentIndex = 0;
+        _stepsFromBirth = 0;
+
+        // Teleport back to start
+        transform.position = _startPosition;
+    }
+
     private void OnDestroy()
     {
         CharacterMovement.OnStep.RemoveListener(AdvanceStep);
         CharacterMovement.OnReset.RemoveListener(ResetTheLevel);
         CharacterMovement.OnPreUndo.RemoveListener(TryUndo);
+        CloneRecorder.OnReplay.RemoveListener(RestartLoop);
     }
 }

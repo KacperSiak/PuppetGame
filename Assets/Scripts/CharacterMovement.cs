@@ -124,46 +124,54 @@ public class CharacterMovement : MonoBehaviour
 
     private bool TryMove(Vector3Int direction)
     {
-        // 1. Calculate the horizontal target
         Vector3Int targetPos = gridPosition + direction;
 
-        // 2. CHECK FOR ELEVATOR at the target position (Are we walking ONTO an elevator?)
-        // We check slightly below the target position to find the floor tile
+        // Hold a reference to the elevator if we find one
+        ElevatorTile activeElevator = null;
+
+        // 1. CHECK FLOOR (Is there an elevator below the target?)
         Vector3 checkFloorPos = new Vector3(targetPos.x * cellsize, targetPos.y * cellsize, targetPos.z * cellsize);
 
-        // Check for elevator tile slightly below the feet level (offset -0.5f usually works for floor checks)
         Collider[] floorColliders = Physics.OverlapSphere(checkFloorPos + Vector3.down * (cellsize * 0.5f), 0.3f);
 
         foreach (var col in floorColliders)
         {
             if (col.TryGetComponent(out ElevatorTile elevator))
             {
-                // If we found an elevator, adjust the target Y
+                // Adjust player target height
                 targetPos.y += elevator.heightDelta;
+
+                // Store reference so we can move it LATER (only if move is valid)
+                activeElevator = elevator;
             }
         }
 
-        // 3. Now validate the FINAL target position (Walls/Boxes)
+        // 2. CHECK OBSTACLES (Walls/Boxes at the NEW target height)
         Vector3 checkPos = new Vector3(targetPos.x * cellsize, targetPos.y * cellsize, targetPos.z * cellsize);
 
-        // Check for walls
         if (Physics.CheckSphere(checkPos, 0.3f, LayerMask.GetMask("Wall")))
             return false;
 
-        // Check for boxes
         Collider[] colliders = Physics.OverlapSphere(checkPos, 0.3f, LayerMask.GetMask("Box"));
         if (colliders.Length > 0)
         {
             PushableBox box = colliders[0].GetComponent<PushableBox>();
             if (box != null)
             {
-                // Pass direction to box. 
-                // Note: Boxes usually don't ride elevators in standard Sokoban, 
-                // but if they do, the Box script needs similar elevator logic.
                 if (!box.Push(direction)) return false;
             }
         }
 
+        // 3. COMMIT MOVE
+        // If we got here, the move is valid. 
+
+        // If we used an elevator, trigger its animation/logic now
+        if (activeElevator != null)
+        {
+            activeElevator.Interact();
+        }
+
+    
         gridPosition = targetPos;
         _animator.SetTrigger("Walk");
         return true;

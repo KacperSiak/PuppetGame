@@ -9,6 +9,7 @@ public class CoinStand : MonoBehaviour
     private bool _downIsActive;
 
     private bool _isStandDown = false;
+    [SerializeField] private GameObject _collider;
 
     private void Awake()
     {
@@ -26,11 +27,13 @@ public class CoinStand : MonoBehaviour
         {
             _animator.SetTrigger("Up");
             _isStandDown = true;
+            _collider.SetActive(false);
         }
         else if (!shouldBeDown && _isStandDown)
         {
             _animator.SetTrigger("Down");
             _isStandDown = false;
+            _collider.SetActive(true);
         }
     }
 

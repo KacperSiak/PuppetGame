@@ -11,6 +11,8 @@ public class CloneRecorderPlayer : MonoBehaviour
     private Vector3 _startPosition;
     private int _stepsFromBirth = 0;
 
+    private Animator _animator;
+
     public void Begin(List<StepFrame> recordedSteps)
     {
         _steps = recordedSteps;
@@ -22,6 +24,8 @@ public class CloneRecorderPlayer : MonoBehaviour
         CharacterMovement.OnReset.AddListener(ResetTheLevel);
         CharacterMovement.OnPreUndo.AddListener(TryUndo);
         CloneRecorder.OnReplay.AddListener(RestartLoop);
+
+        _animator = GetComponent<Animator>();
     }
 
     private void AdvanceStep()
@@ -57,6 +61,13 @@ public class CloneRecorderPlayer : MonoBehaviour
         // Apply movement using Y axis
         transform.position = new Vector3(nextPos.x * cellsize, nextPos.y * cellsize, nextPos.z * cellsize);
         _currentIndex++;
+
+        if (direction.x != 0 || direction.z != 0)
+        {
+            Vector3 lookDir = new Vector3(direction.x, 0f, direction.z);
+            transform.rotation = Quaternion.LookRotation(lookDir);
+            _animator.SetTrigger("Walk");
+        }
     }
 
     public void TryUndo()

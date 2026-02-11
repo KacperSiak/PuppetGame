@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CloneRecorderPlayer : MonoBehaviour
+public class CloneRecorderPlayer : MonoBehaviour, IPressable
 {
     [SerializeField] private float cellsize = 1f;
 

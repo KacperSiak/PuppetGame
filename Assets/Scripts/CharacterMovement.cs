@@ -18,6 +18,8 @@ public class CharacterMovement : MonoBehaviour, IPressable
     private int _spawnIndex = 1;
     private Animator _animator;
 
+    private bool blockedMovement;
+
     private void Start()
     {
         _spawnIndex = 1;
@@ -30,6 +32,8 @@ public class CharacterMovement : MonoBehaviour, IPressable
         UpdateWorldPosition();
 
         _animator = GetComponent<Animator>();
+
+        FinalDestination.OnLevelEnd.AddListener(BlockMovement);
     }
 
     private void Update()
@@ -60,10 +64,10 @@ public class CharacterMovement : MonoBehaviour, IPressable
         // MOVEMENT INPUT (Maps 2D Input to 3D Directions)
         Vector3Int moveDir = Vector3Int.zero;
 
-        if (Input.GetKeyDown(KeyCode.W)) moveDir = Vector3Int.forward; // Z+
-        else if (Input.GetKeyDown(KeyCode.S)) moveDir = Vector3Int.back;    // Z-
-        else if (Input.GetKeyDown(KeyCode.D)) moveDir = Vector3Int.right;  // X+
-        else if (Input.GetKeyDown(KeyCode.A)) moveDir = Vector3Int.left;   // X-
+        if (Input.GetKeyDown(KeyCode.W) && !blockedMovement) moveDir = Vector3Int.forward; // Z+
+        else if (Input.GetKeyDown(KeyCode.S) && !blockedMovement) moveDir = Vector3Int.back;    // Z-
+        else if (Input.GetKeyDown(KeyCode.D) && !blockedMovement) moveDir = Vector3Int.right;  // X+
+        else if (Input.GetKeyDown(KeyCode.A) && !blockedMovement) moveDir = Vector3Int.left;   // X-
 
         if (moveDir != Vector3Int.zero)
         {
@@ -176,5 +180,10 @@ public class CharacterMovement : MonoBehaviour, IPressable
         gridPosition = targetPos;
         _animator.SetTrigger("Walk");
         return true;
+    }
+
+    private void BlockMovement()
+    {
+        blockedMovement = true;
     }
 }

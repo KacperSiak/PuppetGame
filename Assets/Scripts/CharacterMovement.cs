@@ -14,6 +14,7 @@ public class CharacterMovement : MonoBehaviour, IPressable
     public static UnityEvent OnUndo = new UnityEvent();
     public static UnityEvent OnPreUndo = new UnityEvent();
     public static UnityEvent OnLateStep = new UnityEvent();
+    public static UnityEvent OnConveyorStep = new UnityEvent();
 
     [SerializeField] private CloneRecorder recorder;
     private int _spawnIndex = 1;
@@ -31,6 +32,7 @@ public class CharacterMovement : MonoBehaviour, IPressable
             Mathf.RoundToInt(transform.position.z / cellsize)
         );
         UpdateWorldPosition();
+        OnConveyorStep.AddListener(CheckConveyor);
 
         _animator = GetComponent<Animator>();
 
@@ -96,9 +98,13 @@ public class CharacterMovement : MonoBehaviour, IPressable
         {
             if(!passedTurn) transform.rotation = Quaternion.LookRotation(moveDir);
 
+            OnStep.Invoke();
+            OnConveyorStep.Invoke();
+
             recorder.RecordStep(gridPosition);
             if (didMove) UpdateWorldPosition();
-            OnStep.Invoke();
+
+
             OnLateStep.Invoke();
         }
     }
@@ -198,5 +204,30 @@ public class CharacterMovement : MonoBehaviour, IPressable
     private void BlockMovement()
     {
         blockedMovement = true;
+    }
+
+    private void CheckConveyor()
+    {
+        // Look at the floor slightly below the player
+        Vector3 checkFloorPos = new Vector3(gridPosition.x * cellsize, gridPosition.y * cellsize, gridPosition.z * cellsize);
+        Collider[] floorColliders = Physics.OverlapSphere(checkFloorPos + Vector3.down * (cellsize * 0.5f), 0.3f);
+
+        foreach (var col in floorColliders)
+        {
+            if (col.TryGetComponent(out ConveyorTile conveyor))
+            {
+                // Re-use your existing movement logic! 
+                // This correctly handles walls, elevators, and pushing boxes.
+                TryMove(conveyor.pushDirection);
+                break; // Only get pushed by one conveyor at a time
+            }
+        }
+    }
+
+    private void OnDestroy()
+    {
+        // Always clean up listeners
+        OnConveyorStep.RemoveListener(CheckConveyor);
+        FinalDestination.OnLevelEnd.RemoveListener(BlockMovement);
     }
 }

@@ -24,6 +24,7 @@ public class PushableBox : MonoBehaviour, IPressable
         CharacterMovement.OnLateStep.AddListener(RecordHistory);
         CharacterMovement.OnUndo.AddListener(Undo);
         CharacterMovement.OnReset.AddListener(ResetBox);
+        CharacterMovement.OnConveyorStep.AddListener(CheckConveyor);
 
         UpdateWorldPosition();
     }
@@ -79,11 +80,28 @@ public class PushableBox : MonoBehaviour, IPressable
         transform.position = new Vector3(gridPosition.x * cellSize, gridPosition.y * cellSize, gridPosition.z * cellSize);
     }
 
+    private void CheckConveyor()
+    {
+        Vector3 checkFloorPos = new Vector3(gridPosition.x * cellSize, gridPosition.y * cellSize, gridPosition.z * cellSize);
+        Collider[] floorColliders = Physics.OverlapSphere(checkFloorPos + Vector3.down * (cellSize * 0.5f), 0.3f);
+
+        foreach (var col in floorColliders)
+        {
+            if (col.TryGetComponent(out ConveyorTile conveyor))
+            {
+                // Re-use existing push logic
+                Push(conveyor.pushDirection);
+                break;
+            }
+        }
+    }
+
     private void OnDestroy() // gemini said this prevents memory leaks so here we go
     {
         CloneRecorder.OnCloneSpawned.RemoveListener(ResetBox);
         CharacterMovement.OnLateStep.RemoveListener(RecordHistory);
         CharacterMovement.OnUndo.RemoveListener(Undo);
         CharacterMovement.OnReset.RemoveListener(ResetBox);
+        CharacterMovement.OnConveyorStep.RemoveListener(CheckConveyor);
     }
 }

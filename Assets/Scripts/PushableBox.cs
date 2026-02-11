@@ -29,19 +29,22 @@ public class PushableBox : MonoBehaviour, IPressable
         UpdateWorldPosition();
     }
 
-    public bool Push(Vector3Int direction) // Changed to Vector3Int
+    public bool Push(Vector3Int direction)
     {
         Vector3Int targetPos = gridPosition + direction;
+        Vector3 checkPos = new Vector3(targetPos.x * cellSize, targetPos.y * cellSize, targetPos.z * cellSize);
 
-        // Optional: Add Elevator logic here if boxes can ride elevators too
-        // (Copy the Elevator Check block from CharacterMovement here if needed)
+        // 1. Get both the Wall AND Box layers so they act as solid obstacles
+        int obstacleLayers = LayerMask.GetMask("Wall", "Box");
 
-        // check for walls at the NEW height
-        if (Physics.CheckSphere(new Vector3(targetPos.x * cellSize, targetPos.y * cellSize, targetPos.z * cellSize), 0.3f, obstacleLayer))
+        // 2. Check for walls or other boxes at the target location
+        if (Physics.CheckSphere(checkPos, 0.3f, obstacleLayers))
         {
+            // The path is blocked! Tell the player/clone the push failed.
             return false;
         }
 
+        // 3. The path is clear, execute the push
         gridPosition = targetPos;
         UpdateWorldPosition();
         return true;

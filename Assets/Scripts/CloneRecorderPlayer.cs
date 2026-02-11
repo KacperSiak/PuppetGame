@@ -61,13 +61,15 @@ public class CloneRecorderPlayer : MonoBehaviour
         // Apply movement using Y axis
         transform.position = new Vector3(nextPos.x * cellsize, nextPos.y * cellsize, nextPos.z * cellsize);
         _currentIndex++;
-
-        if (direction.x != 0 || direction.z != 0)
+        if (direction != Vector3Int.zero)
         {
-            Vector3 lookDir = new Vector3(direction.x, 0f, direction.z);
-            transform.rotation = Quaternion.LookRotation(lookDir);
-            _animator.SetTrigger("Walk");
-        }
+            if (direction.x != 0 || direction.z != 0)
+            {
+                Vector3 lookDir = new Vector3(direction.x, 0f, direction.z);
+                transform.rotation = Quaternion.LookRotation(lookDir);
+                _animator.SetTrigger("Walk");
+            }
+        }    
     }
 
     public void TryUndo()

@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class TorchChanges : MonoBehaviour
+public class ButtonIndicatorChanges : MonoBehaviour
 {
     [SerializeField] private Material green;
     [SerializeField] private Material red;

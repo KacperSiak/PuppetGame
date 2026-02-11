@@ -16,4 +16,10 @@ public class LevelManager : MonoBehaviour
 
         SceneManager.LoadScene(name);
     }
+
+    public void RageQuit()
+    {
+        Application.Quit();
+    }
+
 }

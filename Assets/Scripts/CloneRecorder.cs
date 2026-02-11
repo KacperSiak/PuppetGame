@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -18,7 +19,12 @@ public class CloneRecorder : MonoBehaviour
     [SerializeField] private GameObject marionetteClone;
     [SerializeField] private CharacterMovement player;
 
+    
+
+    [Header("Counters")]
     [SerializeField] private int marionetteCounter = 3;
+    [SerializeField] private TextMeshProUGUI stepsText;
+    [SerializeField] private TextMeshProUGUI puppetCounterText;
     public int availableSteps = 20;
 
     private List<StepFrame> _recordedSteps = new List<StepFrame>();
@@ -39,6 +45,9 @@ public class CloneRecorder : MonoBehaviour
         _initialMarionetteCounter = marionetteCounter;
         _initialAvailableSteps = availableSteps;
 
+        stepsText.text = availableSteps.ToString();
+        puppetCounterText.text = marionetteCounter.ToString();
+
         _startLoopPosition = player.gridPosition;
 
         CharacterMovement.OnReset.AddListener(ResetCloneRecorder);
@@ -50,6 +59,7 @@ public class CloneRecorder : MonoBehaviour
         {
             SpawnMarionette();
             marionetteCounter--;
+            puppetCounterText.text = marionetteCounter.ToString();
         }
     }
 
@@ -58,6 +68,7 @@ public class CloneRecorder : MonoBehaviour
     {
         _recordedSteps.Add(new StepFrame(step));
         availableSteps--;
+        stepsText.text = availableSteps.ToString();
     }
 
     private void SpawnMarionette()
@@ -95,6 +106,7 @@ public class CloneRecorder : MonoBehaviour
 
         _recordedSteps.RemoveAt(_recordedSteps.Count - 1);
         availableSteps++;
+        stepsText.text = availableSteps.ToString();
 
         if (_recordedSteps.Count == 0)
         {
@@ -113,6 +125,9 @@ public class CloneRecorder : MonoBehaviour
         _marionetteSpawnIndex = 0;
         marionetteCounter = _initialMarionetteCounter;
         availableSteps = _initialAvailableSteps;
+
+        stepsText.text = availableSteps.ToString();
+        puppetCounterText.text = marionetteCounter.ToString();
 
         _recordedSteps.Clear();
         _startLoopPosition = player.gridPosition;

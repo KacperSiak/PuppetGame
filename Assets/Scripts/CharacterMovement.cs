@@ -73,27 +73,31 @@ public class CharacterMovement : MonoBehaviour, IPressable
         // MOVEMENT INPUT (Maps 2D Input to 3D Directions)
         Vector3Int moveDir = Vector3Int.zero;
 
-        if (Input.GetKeyDown(KeyCode.W) && !blockedMovement) moveDir = Vector3Int.forward; // Z+
-        else if (Input.GetKeyDown(KeyCode.S) && !blockedMovement) moveDir = Vector3Int.back;    // Z-
-        else if (Input.GetKeyDown(KeyCode.D) && !blockedMovement) moveDir = Vector3Int.right;  // X+
-        else if (Input.GetKeyDown(KeyCode.A) && !blockedMovement) moveDir = Vector3Int.left;   // X-
+        bool passedTurn = Input.GetKeyDown(KeyCode.Space);
 
-        if (moveDir != Vector3Int.zero)
+        if (!passedTurn) // Only check directional movement if we didn't pass the turn
         {
-            if (TryMove(moveDir))
+            if (Input.GetKeyDown(KeyCode.W) && !blockedMovement) moveDir = Vector3Int.forward; // Z+
+            else if (Input.GetKeyDown(KeyCode.S) && !blockedMovement) moveDir = Vector3Int.back;    // Z-
+            else if (Input.GetKeyDown(KeyCode.D) && !blockedMovement) moveDir = Vector3Int.right;  // X+
+            else if (Input.GetKeyDown(KeyCode.A) && !blockedMovement) moveDir = Vector3Int.left;   // X-
+
+            if (moveDir != Vector3Int.zero)
             {
-                didMove = true;
+                if (TryMove(moveDir))
+                {
+                    didMove = true;
+                }
             }
         }
 
-
         // COMMIT MOVE
-        if (didMove)
+        if (didMove || passedTurn)
         {
-            transform.rotation = Quaternion.LookRotation(moveDir);
+            if(!passedTurn) transform.rotation = Quaternion.LookRotation(moveDir);
 
             recorder.RecordStep(gridPosition);
-            UpdateWorldPosition();
+            if (didMove) UpdateWorldPosition();
             OnStep.Invoke();
             OnLateStep.Invoke();
         }

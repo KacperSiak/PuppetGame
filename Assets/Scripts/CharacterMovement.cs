@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using System.Collections;
 
 public class CharacterMovement : MonoBehaviour, IPressable
 {
@@ -34,6 +35,14 @@ public class CharacterMovement : MonoBehaviour, IPressable
         _animator = GetComponent<Animator>();
 
         FinalDestination.OnLevelEnd.AddListener(BlockMovement);
+        StartCoroutine(StartBlockMovement());
+    }
+    
+    IEnumerator StartBlockMovement()
+    {
+        blockedMovement = true;
+        yield return new WaitForSeconds(4f);
+        blockedMovement = false;
     }
 
     private void Update()

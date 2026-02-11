@@ -4,16 +4,15 @@ public class CurtainCall : MonoBehaviour
 {
     private Animator animator;
 
-    private void Start()
+
+    private void Awake()
     {
         animator = GetComponent<Animator>();
         FinalDestination.OnLevelEnd.AddListener(CloseTheCurtains);
     }
-
-    private void Update()
+    private void Start()
     {
-        if (animator != null && Input.GetKeyDown(KeyCode.L)) animator.SetTrigger("Open");
-        if (animator != null && Input.GetKeyDown(KeyCode.M)) animator.SetTrigger("Close");
+        animator.SetTrigger("Open");
     }
 
     private void CloseTheCurtains()
